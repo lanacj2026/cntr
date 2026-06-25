@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CNTR. — Coming Soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #080808;
+      --white: #F0EDE8;
+      --card: #111111;
+      --muted: #555;
+      --muted2: #888;
+      --line: rgba(240,237,232,0.1);
+      --bebas: 'Bebas Neue', sans-serif;
+      --inter: 'Inter', sans-serif;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--inter);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── INTRO ─── */
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+    }
+
+    #intro.out {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .hint {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      animation: fadeUp 1s ease 0.8s both;
+    }
+
+    #globe-wrap {
+      animation: fadeUp 1s ease 0.4s both;
+      cursor: pointer;
+      position: relative;
+      border-radius: 50%;
+    }
+
+    #globe-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      border: 1px solid rgba(240,237,232,0.12);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.35s, transform 0.35s;
+    }
+
+    #globe-wrap:hover::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    #globe-canvas {
+      display: block;
+      border-radius: 50%;
+    }
+
+    /* ─── FLASH ─── */
+    #flash {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: var(--black);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ─── CNTR REVEAL ─── */
+    #cntr-reveal {
+      position: fixed;
+      inset: 0;
+      z-index: 1500;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cntr-big {
+      font-family: var(--bebas);
+      font-size: clamp(90px, 22vw, 220px);
+      letter-spacing: 0.02em;
+      color: var(--white);
+      transform: scale(0.75);
+      opacity: 0;
+      transition: transform 0.65s cubic-bezier(0.16,1,0.3,1), opacity 0.45s ease;
+    }
+
+    .cntr-big.pop { transform: scale(1); opacity: 1; }
+
+    /* ─── MAIN ─── */
+    #main {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      padding: 24px 16px 48px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #main.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* HERO CARD */
+    .card-hero {
+      padding: 40px 32px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .wordmark {
+      font-family: var(--bebas);
+      font-size: clamp(72px, 20vw, 130px);
+      line-height: 0.88;
+      letter-spacing: 0.01em;
+      color: var(--white);
+    }
+
+    .wordmark .hollow {
+      -webkit-text-stroke: 1.5px var(--white);
+      color: transparent;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .formerly {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+
+    .launch-badge {
+      background: rgba(240,237,232,0.07);
+      border: 1px solid var(--line);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--white);
+      white-space: nowrap;
+    }
+
+    /* ABOUT CARD */
+    .card-about {
+      padding: 36px 32px;
+    }
+
+    .card-about .eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .card-about h2 {
+      font-family: var(--bebas);
+      font-size: clamp(36px, 8vw, 52px);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 20px;
+    }
+
+    .card-about p {
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    .card-about p:last-child { margin-bottom: 0; }
+    .card-about p strong { color: var(--white); font-weight: 600; }
+
+    /* PILLARS CARD */
+    .card-pillars {
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .pillar {
+      background: var(--card);
+      padding: 24px 20px;
+    }
+
+    .pillar-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .pillar-name {
+      font-family: var(--bebas);
+      font-size: 26px;
+      letter-spacing: 0.06em;
+      color: var(--white);
+    }
+
+    /* FORM CARD */
+    .card-form {
+      padding: 36px 32px;
+    }
+
+    .card-form .eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .card-form h3 {
+      font-family: var(--bebas);
+      font-size: clamp(36px, 8vw, 52px);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .card-form .sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--muted2);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-bottom: 8px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 400;
+      font-family: var(--inter);
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .field select option { background: #1a1a1a; color: var(--white); }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(240,237,232,0.35);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .field input::placeholder { color: var(--muted); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 16px;
+      background: var(--white);
+      color: var(--black);
+      font-family: var(--inter);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .submit-btn:hover { background: #fff; }
+    .submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+    #form-success {
+      display: none;
+      text-align: center;
+      padding: 32px 0 8px;
+    }
+
+    #form-success .check {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    #form-success p {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--muted2);
+      line-height: 1.6;
+    }
+
+    #form-success strong { color: var(--white); }
+
+    /* FOOTER CARD */
+    .card-footer {
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo {
+      font-family: var(--bebas);
+      font-size: 24px;
+      letter-spacing: 0.1em;
+      color: var(--white);
+    }
+
+    .ig-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--muted2);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .ig-link:hover { color: var(--white); }
+
+    .ig-link svg { width: 16px; height: 16px; fill: currentColor; }
+
+    .footer-copy {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      width: 100%;
+    }
+
+    /* ─── KEYFRAMES ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 480px) {
+      #main { padding: 16px 12px 40px; gap: 10px; }
+      .card-hero, .card-about, .card-form, .card-footer { padding: 28px 22px; }
+      .two-col { grid-template-columns: 1fr; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="flash"></div>
+
+<div id="cntr-reveal">
+  <div class="cntr-big" id="cntr-text">CNTR.</div>
+</div>
+
+<div id="intro">
+  <p class="hint">Click the globe to get started</p>
+  <div id="globe-wrap">
+    <canvas id="globe-canvas"></canvas>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- HERO CARD -->
+  <div class="card card-hero">
+    <div class="wordmark">CNTR.</div>
+    <div class="hero-meta">
+      <span class="formerly">Formerly Midwest HQ</span>
+      <span class="launch-badge">Fall 2026</span>
+    </div>
+  </div>
+
+  <!-- ABOUT CARD -->
+  <div class="card card-about">
+    <p class="eyebrow">What's coming</p>
+    <h2>The center of<br>Midwest culture.</h2>
+    <p>What started as <strong>Midwest HQ</strong> is becoming something bigger. CNTR. is a digital platform built to spotlight the artists, writers, musicians, and makers who define the culture of the Midwest — before the rest of the world catches up.</p>
+    <p>Long-form editorial, a monthly digital magazine, podcast channels, and a creator directory. A cultural center, moved online. Launching Fall 2026.</p>
+  </div>
+
+  <!-- PILLARS CARD -->
+  <div class="card card-pillars">
+    <div class="pillar">
+      <div class="pillar-label">Editorial</div>
+      <div class="pillar-name">CNTR Blogs</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-label">Podcast</div>
+      <div class="pillar-name">CNTR Pod</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-label">Magazine</div>
+      <div class="pillar-name">CNTRMAG</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-label">Directory</div>
+      <div class="pillar-name">Creators</div>
+    </div>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="card card-form">
+    <p class="eyebrow">Stay in the loop</p>
+    <h3>Be first in.</h3>
+    <p class="sub">Drop your info — we'll hit you when CNTR. goes live. No spam, just the signal.</p>
+
+    <form id="cntr-form" action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="ccd1f640-02bf-4067-a16a-ceaf83a059bd"/>
+      <input type="hidden" name="subject" value="CNTR. Interest Form Submission"/>
+      <input type="checkbox" name="botcheck" style="display:none"/>
+
+      <div class="two-col">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" name="first_name" placeholder="Jordan" required/>
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" name="last_name" placeholder="Ellis" required/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@email.com" required/>
+      </div>
+
+      <div class="field">
+        <label>I am a —</label>
+        <select name="role">
+          <option value="" disabled selected>Select one</option>
+          <option>Artist / Photographer</option>
+          <option>Writer / Poet</option>
+          <option>Musician / Producer</option>
+          <option>Filmmaker / Creator</option>
+          <option>Listener / Reader / Fan</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>City</label>
+        <input type="text" name="city" placeholder="Oklahoma City, OK"/>
+      </div>
+
+      <button type="submit" class="submit-btn">Notify Me →</button>
+    </form>
+
+    <div id="form-success">
+      <div class="check">✦</div>
+      <p>You're in. <strong>We'll be in touch</strong> when CNTR. goes live.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER CARD -->
+  <div class="card card-footer">
+    <span class="footer-logo">CNTR.</span>
+    <a class="ig-link" href="https://instagram.com/midwest.hq" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      @midwest.hq
+    </a>
+    <span class="footer-copy">© 2026 CNTR. — Formerly Midwest HQ</span>
+  </div>
+
+</div>
+
+<!-- D3 + TopoJSON for accurate globe -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+(async () => {
+  // ─── GLOBE SETUP ───
+  const SIZE = Math.min(window.innerWidth * 0.72, 300);
+  const canvas = document.getElementById('globe-canvas');
+  canvas.width = canvas.height = SIZE;
+  const ctx = canvas.getContext('2d');
+  const R = SIZE / 2 - 1;
+
+  const projection = d3.geoOrthographic()
+    .scale(R)
+    .translate([SIZE / 2, SIZE / 2])
+    .clipAngle(90);
+
+  const path = d3.geoPath(projection, ctx);
+
+  // Load world topology
+  let worldData = null;
+  try {
+    const res = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    const topo = await res.json();
+    worldData = topojson.feature(topo, topo.objects.countries);
+  } catch(e) {
+    // fallback: just draw the sphere
+    worldData = { type: 'FeatureCollection', features: [] };
+  }
+
+  const graticule = d3.geoGraticule10();
+  const sphere = { type: 'Sphere' };
+
+  let yaw = 0; // rotation degrees
+  let rafId;
+  let spinning = true;
+
+  function draw(y) {
+    projection.rotate([y, -20, 0]);
+    ctx.clearRect(0, 0, SIZE, SIZE);
+
+    // Globe fill
+    ctx.beginPath();
+    path(sphere);
+    const grad = ctx.createRadialGradient(SIZE*0.38, SIZE*0.35, SIZE*0.05, SIZE/2, SIZE/2, R);
+    grad.addColorStop(0, '#1e1e1e');
+    grad.addColorStop(1, '#080808');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Graticule
+    ctx.beginPath();
+    path(graticule);
+    ctx.strokeStyle = 'rgba(240,237,232,0.07)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Countries
+    ctx.beginPath();
+    path(worldData);
+    ctx.fillStyle = 'rgba(240,237,232,0.09)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(240,237,232,0.55)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Outer ring
+    ctx.beginPath();
+    path(sphere);
+    ctx.strokeStyle = 'rgba(240,237,232,0.55)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  function spinLoop() {
+    if (!spinning) return;
+    yaw = (yaw + 0.18) % 360;
+    draw(yaw);
+    rafId = requestAnimationFrame(spinLoop);
+  }
+
+  spinLoop();
+
+  // ─── CLICK SEQUENCE ───
+  let fired = false;
+
+  document.getElementById('globe-wrap').addEventListener('click', () => {
+    if (fired) return;
+    fired = true;
+
+    spinning = false;
+    cancelAnimationFrame(rafId);
+
+    // Target: US center lon ≈ -98 → want yaw = 98 so US faces front
+    // Spin fast clockwise ~1 full revolution to that target
+    const targetYaw = 98;
+    const current = ((yaw % 360) + 360) % 360;
+    // How many degrees to spin: at least 360 + delta to target
+    let delta = ((targetYaw - current) + 360) % 360;
+    if (delta < 10) delta += 360;
+    const totalDeg = 360 + delta;
+    const startYaw = current;
+    const endYaw = current + totalDeg;
+
+    // Duration: 900ms
+    const duration = 900;
+    let startTime = null;
+
+    function fastSpin(ts) {
+      if (!startTime) startTime = ts;
+      const elapsed = ts - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      // ease-in then sharp stop
+      const ease = t < 0.7 ? (t / 0.7) * (t / 0.7) : 1 - Math.pow(1 - (t - 0.7) / 0.3, 3);
+      const currentY = startYaw + ease * totalDeg;
+      draw(currentY);
+
+      if (t < 1) {
+        requestAnimationFrame(fastSpin);
+      } else {
+        // Done spinning — flash to black
+        flashSequence();
+      }
+    }
+
+    requestAnimationFrame(fastSpin);
+  });
+
+  function flashSequence() {
+    const flash = document.getElementById('flash');
+    // Quick flash in
+    flash.style.transition = 'opacity 0.18s ease';
+    flash.style.opacity = '1';
+
+    setTimeout(() => {
+      // Hide intro
+      document.getElementById('intro').classList.add('out');
+
+      // Show CNTR reveal
+      const reveal = document.getElementById('cntr-reveal');
+      reveal.style.opacity = '1';
+
+      setTimeout(() => {
+        document.getElementById('cntr-text').classList.add('pop');
+      }, 80);
+
+      // Fade flash out (keep reveal visible)
+      setTimeout(() => {
+        flash.style.transition = 'opacity 0.3s ease';
+        flash.style.opacity = '0';
+      }, 250);
+
+      // After holding on CNTR — fade reveal, show page
+      setTimeout(() => {
+        reveal.style.transition = 'opacity 0.5s ease';
+        reveal.style.opacity = '0';
+        setTimeout(() => {
+          reveal.style.display = 'none';
+          document.getElementById('intro').style.display = 'none';
+          document.body.style.overflowY = 'auto';
+          const main = document.getElementById('main');
+          main.classList.add('visible');
+        }, 500);
+      }, 1400);
+    }, 200);
+  }
+
+  // ─── FORM ───
+  document.getElementById('cntr-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.submit-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST', body: new FormData(e.target)
+      });
+      const json = await res.json();
+      if (json.success) {
+        e.target.style.display = 'none';
+        document.getElementById('form-success').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
